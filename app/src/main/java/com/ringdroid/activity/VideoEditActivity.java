@@ -1027,23 +1027,25 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
 
 
     public void onConfirm(View view){
-        videoEncode = new VideoEncode();
-        videoEncode.setEncoderListener(new VideoEncode.OnEncoderListener() {
-            @Override
-            public void onStart() {
+        if (videoEncode == null) {
+            videoEncode = new VideoEncode();
+            videoEncode.setEncoderListener(new VideoEncode.OnEncoderListener() {
+                @Override
+                public void onStart() {
 
-            }
+                }
 
-            @Override
-            public void onStop() {
+                @Override
+                public void onStop() {
 
-            }
+                }
 
-            @Override
-            public void onProgress(int progress) {
+                @Override
+                public void onProgress(int progress) {
 
-            }
-        });
+                }
+            });
+        }
         float[] cutArr = cutView.getCutArr();
         float left = cutArr[0];
         float top = cutArr[1];

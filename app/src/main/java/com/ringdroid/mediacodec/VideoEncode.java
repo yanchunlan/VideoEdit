@@ -155,7 +155,6 @@ public class VideoEncode {
                     duration = format.getLong(MediaFormat.KEY_DURATION);
 
 
-
                     int BIT_RATE = cropWidth*cropHeight*2*8;
                     MediaFormat mediaFormat = MediaFormat.createVideoFormat(mime, cropWidth, cropHeight);
                     mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE);
@@ -178,13 +177,14 @@ public class VideoEncode {
                             mEglUtils = new EGLUtils();
                             mEglUtils.initEGL(surface);
                             mFramebuffer = new GLFramebuffer(textureVertexData);
-                            mFramebuffer.initFramebuffer(cropWidth,cropHeight);
-                            SurfaceTexture surfaceTexture = mFramebuffer.getSurfaceTexture(cropWidth,cropHeight);
+                            mFramebuffer.onCreated();
+                            mFramebuffer.onChanged(cropWidth,cropHeight);
+                            SurfaceTexture surfaceTexture = mFramebuffer.getSurfaceTexture();
                             surfaceTexture.setDefaultBufferSize(cropWidth,cropHeight);
                             surfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
                                 @Override
                                 public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-                                    mFramebuffer.drawFrameBuffer();
+                                    mFramebuffer.onDrawFrame();
                                     mEglUtils.swap();
                                     synchronized (decoderObject){
                                         isDraw = true;
@@ -221,7 +221,7 @@ public class VideoEncode {
 
     private void start(){
         Log.d(TAG, "start  run: "+Thread.currentThread().getName());
-
+        Log.w(TAG, "run: startTime "+startTime+" endTime "+endTime+" duration "+duration);
 
         muxerStart = false;
         videoInit = false;
@@ -231,8 +231,12 @@ public class VideoEncode {
             public void run() {
                 Log.d(TAG, "videoHandler run: "+Thread.currentThread().getName());
 
-//                Log.w(TAG, "run: -----------------------------  start  -----------------------------");
-//                Log.w(TAG, "run: startTime "+startTime+" endTime "+endTime+" duration "+duration);
+                Log.w(TAG, "run: -----------------------------  start  -----------------------------");
+                Log.w(TAG, "run: startTime "+startTime+" endTime "+endTime+" duration "+duration);
+                if (audioEncode == null
+                        ) {
+                    audioInit = true;
+                }
                 while (true) {
                     if(!audioInit){  // 音频没有混合就不开始解码
                         synchronized (videoObject){
@@ -249,8 +253,8 @@ public class VideoEncode {
                         MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
                         int outIndex = videoDecoder.dequeueOutputBuffer(info, 10000);
                         presentationTimeUs = info.presentationTimeUs;
-//                        Log.d(TAG, "run: videoDecoder  outIndex "+outIndex+" presentationTimeUs "
-//                                +info.presentationTimeUs+" size "+info.size+" flag "+info.flags+" offset "+info.offset);
+                        Log.d(TAG, "run: videoDecoder  outIndex "+outIndex+" presentationTimeUs "
+                                +info.presentationTimeUs+" size "+info.size+" flag "+info.flags+" offset "+info.offset);
                         if(outIndex >= 0){
                             videoDecoder.releaseOutputBuffer(outIndex, true /* Surface init */);
                             boolean s = false;
@@ -267,7 +271,7 @@ public class VideoEncode {
                             if(s){
                                 encodeVideoOutputBuffer(videoEncode,info,presentationTimeUs);
                             }else {
-//                                Log.i(TAG, "run: not draw");
+                                Log.i(TAG, "run: not draw");
                             }
                             if(presentationTimeUs > endTime){
                                 videoEncode.signalEndOfInputStream();
@@ -304,10 +308,13 @@ public class VideoEncode {
                 videoEncode.release();
                 videoEncode = null;
                 muxerRelease();
-//                Log.w(TAG, "run: -----------------------------  end  -----------------------------");
+                Log.w(TAG, "run: -----------------------------  end  -----------------------------");
 
             }
         });
+        if (audioEncode == null) {
+            return;
+        }
         audioDecoderHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -340,6 +347,7 @@ public class VideoEncode {
                         if ((info.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
                             info.size = 0;
                             Log.d(TAG, "run: audioDecoder size==0");
+                            audioDecoder.releaseOutputBuffer(outIndex, false);
                         }
                         if (info.size != 0) {
                             Log.d(TAG, "run: audioDecoder size!=0");
@@ -396,6 +404,7 @@ public class VideoEncode {
                         if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
                             bufferInfo.size = 0;
                             Log.d(TAG, "run: audioEncode size==0");
+                            audioEncode.releaseOutputBuffer(inputIndex, false);
                         }
                         if (bufferInfo.size != 0) {
                             Log.d(TAG, "run: audioEncode size!=0");
@@ -469,18 +478,18 @@ public class VideoEncode {
             }
             long sampleTime = mediaExtractor.getSampleTime();
             int sampleSize = mediaExtractor.readSampleData(inputBuffer, 0);
-//            Log.d(TAG, "extractorVideoInputBuffer: sampleTime "+sampleTime+" sampleSize "+sampleSize);
+            Log.d(TAG, "extractorVideoInputBuffer: sampleTime "+sampleTime+" sampleSize "+sampleSize);
             if (mediaExtractor.advance()) {
                 mediaCodec.queueInputBuffer(inputIndex, 0, sampleSize, sampleTime, 0);
-//                Log.w(TAG, "extractorVideoInputBuffer: queueInputBuffer  1 " );
+                Log.w(TAG, "extractorVideoInputBuffer: queueInputBuffer  1 " );
                 return 1;
             } else {
                 if(sampleSize > 0){
                     mediaCodec.queueInputBuffer(inputIndex, 0, sampleSize, sampleTime, 0);
-//                    Log.w(TAG, "extractorVideoInputBuffer: queueInputBuffer  1" );
+                    Log.w(TAG, "extractorVideoInputBuffer: queueInputBuffer  1" );
                     return 1;
                 }else{
-//                    Log.w(TAG, "extractorVideoInputBuffer: queueInputBuffer  -1" );
+                    Log.w(TAG, "extractorVideoInputBuffer: queueInputBuffer  -1" );
                     return -1;
                 }
 
@@ -490,9 +499,9 @@ public class VideoEncode {
     }
     private void encodeVideoOutputBuffer(MediaCodec mediaCodec,MediaCodec.BufferInfo info,long presentationTimeUs){
         int encoderStatus = mediaCodec.dequeueOutputBuffer(info, 50000);
-//        Log.d(TAG, "encodeVideoOutputBuffer: encoderStatus"+encoderStatus);
-//        Log.d(TAG, "videoEncode  encodeVideoOutputBuffer: presentationTimeUs "+presentationTimeUs+
-//                " info presentationTimeUs "+info.presentationTimeUs+" size "+info.size+" flag "+info.flags+" offset "+info.offset);
+        Log.d(TAG, "encodeVideoOutputBuffer: encoderStatus"+encoderStatus);
+        Log.d(TAG, "videoEncode  encodeVideoOutputBuffer: presentationTimeUs "+presentationTimeUs+
+                " info presentationTimeUs "+info.presentationTimeUs+" size "+info.size+" flag "+info.flags+" offset "+info.offset);
         if (encoderStatus >= 0) {
             ByteBuffer encodedData;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
@@ -502,7 +511,7 @@ public class VideoEncode {
             }
             if ((info.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {  // 如果是缓冲区的特定数据就过滤掉，不添加到混合区里面去
                 info.size = 0;
-//                Log.i(TAG, "encodeVideoOutputBuffer: size ==0 return");
+                Log.i(TAG, "encodeVideoOutputBuffer: size ==0 return");
             }
             if (info.size != 0) {
                 if(presentationTimeUs >= startTime && presentationTimeUs<= endTime){
@@ -510,11 +519,11 @@ public class VideoEncode {
                     encodedData.limit(info.offset + info.size);
                     // 此处时间需要重新赋值，是因为编码器是没有时间的，需要自己确定，是根据解码器的时间确定的，而且是一一对应的，解码到surfaceView在编码
                     info.presentationTimeUs = presentationTimeUs - startTime;
-//                    Log.d(TAG, "videoEncode  encodeVideoOutputBuffer: presentationTimeUs "+presentationTimeUs+
-//                            " after presentationTimeUs "+info.presentationTimeUs+" size "+info.size+" flag "+info.flags+" offset "+info.offset);
+                    Log.d(TAG, "videoEncode  encodeVideoOutputBuffer: presentationTimeUs "+presentationTimeUs+
+                            " after presentationTimeUs "+info.presentationTimeUs+" size "+info.size+" flag "+info.flags+" offset "+info.offset);
                     mediaMuxer.writeSampleData(videoTrackIndex, encodedData, info);
                 }else {
-//                    Log.i(TAG, "encodeVideoOutputBuffer: time not accord return");
+                    Log.i(TAG, "encodeVideoOutputBuffer: time not accord return");
                 }
                 if(encoderListener != null){
                     encoderListener.onProgress((int) ((presentationTimeUs-startTime)*100.0f/(endTime-startTime)));

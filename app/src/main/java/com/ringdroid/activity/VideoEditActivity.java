@@ -50,13 +50,14 @@ import com.ringdroid.view.WaveformView;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class VideoEditActivity extends AppCompatActivity implements MarkerView.MarkerListener,
-        WaveformView.WaveformListener{
-
+        WaveformView.WaveformListener {
+    private static final String TAG = "VideoEditActivity";
     private String mFilename;
     private WaveformView mWaveformView;
     private MarkerView mStartMarker;
@@ -122,8 +123,7 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
 
         playerHandler = new Handler();
 
-        mFilename = Environment.getExternalStorageDirectory().getAbsolutePath() +"/test1.mp4";
-
+        mFilename = "/storage/emulated/0/test.mp4";
 
 
         mKeyDown = false;
@@ -159,19 +159,19 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
         fixedThreadPool.execute(new Runnable() {
             @Override
             public void run() {
-                final VideoExtractor videoExtractor = new VideoExtractor(VideoEditActivity.this,mFilename);
+                final VideoExtractor videoExtractor = new VideoExtractor(VideoEditActivity.this, mFilename);
                 if (videoExtractor.getDuration() == 0) {
                     return;
                 }
-                videoExtractor.encoder(0, videoExtractor.getDuration()/4, 1,50,50, new VideoExtractor.OnEncodeListener() {
+                videoExtractor.encoder(0, videoExtractor.getDuration() / 4, 1, 50, 50, new VideoExtractor.OnEncodeListener() {
                     @Override
                     public void onBitmap(int time, Bitmap bitmap) {
-                        if(fixedThreadPool.isShutdown()){
+                        if (fixedThreadPool.isShutdown()) {
                             videoExtractor.stop();
-                        }else{
+                        } else {
                             SparseArray<Bitmap> bitmaps = mWaveformView.getBitmaps();
-                            if(bitmaps != null){
-                                bitmaps.put(time,bitmap);
+                            if (bitmaps != null) {
+                                bitmaps.put(time, bitmap);
                             }
                             mWaveformView.postInvalidate();
                         }
@@ -183,21 +183,21 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
         fixedThreadPool.execute(new Runnable() {
             @Override
             public void run() {
-                final VideoExtractor videoExtractor = new VideoExtractor(VideoEditActivity.this,mFilename);
+                final VideoExtractor videoExtractor = new VideoExtractor(VideoEditActivity.this, mFilename);
                 if (videoExtractor.getDuration() == 0) {
                     return;
                 }
-                long d = videoExtractor.getDuration()/4;
+                long d = videoExtractor.getDuration() / 4;
                 long start = d;
-                videoExtractor.encoder(start, start + d , 1,50,50, new VideoExtractor.OnEncodeListener() {
+                videoExtractor.encoder(start, start + d, 1, 50, 50, new VideoExtractor.OnEncodeListener() {
                     @Override
                     public void onBitmap(int time, Bitmap bitmap) {
-                        if(fixedThreadPool.isShutdown()){
+                        if (fixedThreadPool.isShutdown()) {
                             videoExtractor.stop();
-                        }else{
+                        } else {
                             SparseArray<Bitmap> bitmaps = mWaveformView.getBitmaps();
-                            if(bitmaps != null){
-                                bitmaps.put(time,bitmap);
+                            if (bitmaps != null) {
+                                bitmaps.put(time, bitmap);
                             }
                             mWaveformView.postInvalidate();
                         }
@@ -209,21 +209,21 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
         fixedThreadPool.execute(new Runnable() {
             @Override
             public void run() {
-                final VideoExtractor videoExtractor = new VideoExtractor(VideoEditActivity.this,mFilename);
+                final VideoExtractor videoExtractor = new VideoExtractor(VideoEditActivity.this, mFilename);
                 if (videoExtractor.getDuration() == 0) {
                     return;
                 }
-                long d = videoExtractor.getDuration()/4;
-                long start = 2*d;
-                videoExtractor.encoder(start, start + d , 1,50,50, new VideoExtractor.OnEncodeListener() {
+                long d = videoExtractor.getDuration() / 4;
+                long start = 2 * d;
+                videoExtractor.encoder(start, start + d, 1, 50, 50, new VideoExtractor.OnEncodeListener() {
                     @Override
                     public void onBitmap(int time, Bitmap bitmap) {
-                        if(fixedThreadPool.isShutdown()){
+                        if (fixedThreadPool.isShutdown()) {
                             videoExtractor.stop();
-                        }else{
+                        } else {
                             SparseArray<Bitmap> bitmaps = mWaveformView.getBitmaps();
-                            if(bitmaps != null){
-                                bitmaps.put(time,bitmap);
+                            if (bitmaps != null) {
+                                bitmaps.put(time, bitmap);
                             }
                             mWaveformView.postInvalidate();
                         }
@@ -235,21 +235,21 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
         fixedThreadPool.execute(new Runnable() {
             @Override
             public void run() {
-                final VideoExtractor videoExtractor = new VideoExtractor(VideoEditActivity.this,mFilename);
+                final VideoExtractor videoExtractor = new VideoExtractor(VideoEditActivity.this, mFilename);
                 if (videoExtractor.getDuration() == 0) {
                     return;
                 }
-                long d = videoExtractor.getDuration()/4;
-                long start = 3*d;
-                videoExtractor.encoder(start, videoExtractor.getDuration() , 1,50,50, new VideoExtractor.OnEncodeListener() {
+                long d = videoExtractor.getDuration() / 4;
+                long start = 3 * d;
+                videoExtractor.encoder(start, videoExtractor.getDuration(), 1, 50, 50, new VideoExtractor.OnEncodeListener() {
                     @Override
                     public void onBitmap(int time, Bitmap bitmap) {
-                        if(fixedThreadPool.isShutdown()){
+                        if (fixedThreadPool.isShutdown()) {
                             videoExtractor.stop();
-                        }else{
+                        } else {
                             SparseArray<Bitmap> bitmaps = mWaveformView.getBitmaps();
-                            if(bitmaps != null){
-                                bitmaps.put(time,bitmap);
+                            if (bitmaps != null) {
+                                bitmaps.put(time, bitmap);
                             }
                             mWaveformView.postInvalidate();
                         }
@@ -270,24 +270,23 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
         mWidthPixels = metrics.widthPixels;
         mHeightPixels = (int) getResources().getDimension(R.dimen.dp300);
 
-        mMarkerLeftInset = (int)(46 * mDensity);
-        mMarkerRightInset = (int)(48 * mDensity);
-        mMarkerTopOffset = (int)(10 * mDensity);
-        mMarkerBottomOffset = (int)(10 * mDensity);
+        mMarkerLeftInset = (int) (46 * mDensity);
+        mMarkerRightInset = (int) (48 * mDensity);
+        mMarkerTopOffset = (int) (10 * mDensity);
+        mMarkerBottomOffset = (int) (10 * mDensity);
 
         videoView = findViewById(R.id.video_view);
 
 
+        mStartText = (TextView) findViewById(R.id.starttext);
+        mEndText = (TextView) findViewById(R.id.endtext);
 
-        mStartText = (TextView)findViewById(R.id.starttext);
-        mEndText = (TextView)findViewById(R.id.endtext);
 
-
-        mPlayButton = (ImageButton)findViewById(R.id.play);
+        mPlayButton = (ImageButton) findViewById(R.id.play);
         mPlayButton.setOnClickListener(mPlayListener);
-        mRewindButton = (ImageButton)findViewById(R.id.rew);
+        mRewindButton = (ImageButton) findViewById(R.id.rew);
         mRewindButton.setOnClickListener(mRewindListener);
-        mFfwdButton = (ImageButton)findViewById(R.id.ffwd);
+        mFfwdButton = (ImageButton) findViewById(R.id.ffwd);
         mFfwdButton.setOnClickListener(mFfwdListener);
 
         TextView markStartButton = (TextView) findViewById(R.id.mark_start);
@@ -297,7 +296,7 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
 
         enableDisableButtons();
 
-        mWaveformView = (WaveformView)findViewById(R.id.waveform);
+        mWaveformView = (WaveformView) findViewById(R.id.waveform);
         mWaveformView.setListener(this);
 
 
@@ -311,14 +310,14 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
             mMaxPos = mWaveformView.maxPos();
         }
 
-        mStartMarker = (MarkerView)findViewById(R.id.startmarker);
+        mStartMarker = (MarkerView) findViewById(R.id.startmarker);
         mStartMarker.setListener(this);
         mStartMarker.setAlpha(1f);
         mStartMarker.setFocusable(true);
         mStartMarker.setFocusableInTouchMode(true);
         mStartVisible = true;
 
-        mEndMarker = (MarkerView)findViewById(R.id.endmarker);
+        mEndMarker = (MarkerView) findViewById(R.id.endmarker);
         mEndMarker.setListener(this);
         mEndMarker.setAlpha(1f);
         mEndMarker.setFocusable(true);
@@ -326,7 +325,7 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
         mEndVisible = true;
 
         info = findViewById(R.id.info);
-        if(player == null){
+        if (player == null) {
 
             Uri url = Uri.parse(mFilename);
             DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
@@ -340,25 +339,24 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
             DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this,
                     Util.getUserAgent(this, "ExoPlayerTime"), bandwidthMeter);
 
-            MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(url, playerHandler,null);
+            MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(url, playerHandler, null);
             player.prepare(videoSource);
         }
         Message message = mPlayerHandler.obtainMessage();
         message.what = 100;
-        mPlayerHandler.sendMessageDelayed(message,100);
+        mPlayerHandler.sendMessageDelayed(message, 100);
 
     }
 
 
-
-    private Handler mPlayerHandler = new Handler(){
+    private Handler mPlayerHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if(player != null && player.getDuration() > 0 && player.getVideoFormat() != null){
+            if (player != null && player.getDuration() > 0 && player.getVideoFormat() != null) {
 
                 finishOpeningSoundFile();
-                String mCaption = "0.00 seconds "+formatTime(mMaxPos) + " " +
+                String mCaption = "0.00 seconds " + formatTime(mMaxPos) + " " +
                         "seconds";
                 info.setText(mCaption);
 
@@ -368,22 +366,22 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
                 int screenWidth = mWidthPixels;
                 int screenHeight = mHeightPixels;
 
-                int left,top,viewWidth,viewHeight;
-                float sh = screenWidth*1.0f/screenHeight;
-                float vh = videoWidth *1.0f/ videoHeight;
-                if(sh < vh){
+                int left, top, viewWidth, viewHeight;
+                float sh = screenWidth * 1.0f / screenHeight;
+                float vh = videoWidth * 1.0f / videoHeight;
+                if (sh < vh) {
                     left = 0;
                     viewWidth = screenWidth;
-                    viewHeight = (int)(videoHeight *1.0f/ videoWidth *viewWidth);
-                    top = (screenHeight - viewHeight)/2;
-                }else{
+                    viewHeight = (int) (videoHeight * 1.0f / videoWidth * viewWidth);
+                    top = (screenHeight - viewHeight) / 2;
+                } else {
                     top = 0;
                     viewHeight = screenHeight;
-                    viewWidth = (int)(videoWidth *1.0f/ videoHeight *viewHeight);
-                    left = (screenWidth - viewWidth)/2;
+                    viewWidth = (int) (videoWidth * 1.0f / videoHeight * viewHeight);
+                    left = (screenWidth - viewWidth) / 2;
                 }
 
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(viewWidth,viewHeight);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(viewWidth, viewHeight);
                 params.leftMargin = left;
                 params.topMargin = top;
                 params.bottomMargin = mHeightPixels - top - viewHeight;
@@ -415,13 +413,13 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
 
                     }
                 });
-                videoView.addView(playerView,p);
+                videoView.addView(playerView, p);
                 cutView = new CutView(VideoEditActivity.this);
-                videoView.addView(cutView,p);
-            }else{
+                videoView.addView(cutView, p);
+            } else {
                 Message message = mPlayerHandler.obtainMessage();
                 message.what = 100;
-                mPlayerHandler.sendMessageDelayed(message,100);
+                mPlayerHandler.sendMessageDelayed(message, 100);
             }
         }
     };
@@ -430,7 +428,7 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
     @Override
     protected void onPause() {
         super.onPause();
-        if(player == null){
+        if (player == null) {
             return;
         }
         player.setPlayWhenReady(false);
@@ -439,23 +437,25 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
     @Override
     protected void onResume() {
         super.onResume();
-        if(mIsPlaying && player != null){
+        if (mIsPlaying && player != null) {
             player.setPlayWhenReady(true);
         }
     }
 
-    /** Called when the activity is finally destroyed. */
+    /**
+     * Called when the activity is finally destroyed.
+     */
     @Override
     protected void onDestroy() {
         Log.v("Ringdroid", "EditActivity OnDestroy");
-        if(player != null){
-            if(player.getPlayWhenReady()){
+        if (player != null) {
+            if (player.getPlayWhenReady()) {
                 player.setPlayWhenReady(false);
             }
             player.release();
             player = null;
         }
-        if(mSurface != null){
+        if (mSurface != null) {
             mSurface.release();
         }
         mPlayerHandler.removeMessages(100);
@@ -489,7 +489,7 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
     }
 
     public void waveformTouchMove(float x) {
-        mOffset = trap((int)(mTouchInitialOffset + (mTouchStart - x)));
+        mOffset = trap((int) (mTouchInitialOffset + (mTouchStart - x)));
         updateDisplay();
     }
 
@@ -501,7 +501,7 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
         if (elapsedMsec < 300) {
             if (mIsPlaying) {
                 int seekMsec = mWaveformView.pixelsToMillisecs(
-                        (int)(mTouchStart + mOffset));
+                        (int) (mTouchStart + mOffset));
                 if (seekMsec >= mPlayStartMsec &&
                         seekMsec < mPlayEndMsec) {
                     player.seekTo(seekMsec);
@@ -509,7 +509,7 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
                     handlePause();
                 }
             } else {
-                onPlay((int)(mTouchStart + mOffset));
+                onPlay((int) (mTouchStart + mOffset));
             }
         }
     }
@@ -517,7 +517,7 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
     public void waveformFling(float vx) {
         mTouchDragging = false;
         mOffsetGoal = mOffset;
-        mFlingVelocity = (int)(-vx);
+        mFlingVelocity = (int) (-vx);
         updateDisplay();
     }
 
@@ -559,10 +559,10 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
         float delta = x - mTouchStart;
 
         if (marker == mStartMarker) {
-            mStartPos = trap((int)(mTouchInitialStartPos + delta));
-            mEndPos = trap((int)(mTouchInitialEndPos + delta));
+            mStartPos = trap((int) (mTouchInitialStartPos + delta));
+            mEndPos = trap((int) (mTouchInitialEndPos + delta));
         } else {
-            mEndPos = trap((int)(mTouchInitialEndPos + delta));
+            mEndPos = trap((int) (mTouchInitialEndPos + delta));
             if (mEndPos < mStartPos)
                 mEndPos = mStartPos;
         }
@@ -654,8 +654,6 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
             }
         }, 100);
     }
-
-
 
 
     private void finishOpeningSoundFile() {
@@ -815,8 +813,8 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
                 mLastDisplayedEndPos = mEndPos;
             }
 
-            if(mWaveformView.getPlaybackPos() != -1){
-                String mCaption = formatTime(mWaveformView.getPlaybackPos())+" seconds "+formatTime(mMaxPos) + " " +
+            if (mWaveformView.getPlaybackPos() != -1) {
+                String mCaption = formatTime(mWaveformView.getPlaybackPos()) + " seconds " + formatTime(mMaxPos) + " " +
                         "seconds";
                 info.setText(mCaption);
             }
@@ -890,8 +888,8 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
     }
 
     private String formatDecimal(double x) {
-        int xWhole = (int)x;
-        int xFrac = (int)(100 * (x - xWhole) + 0.5);
+        int xWhole = (int) x;
+        int xFrac = (int) (100 * (x - xWhole) + 0.5);
 
         if (xFrac >= 100) {
             xWhole++; //Round up
@@ -953,10 +951,6 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
             return;
         }
     }
-
-
-
-
 
 
     private View.OnClickListener mPlayListener = new View.OnClickListener() {
@@ -1026,26 +1020,24 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
     }
 
 
-    public void onConfirm(View view){
-        if (videoEncode == null) {
-            videoEncode = new VideoEncode();
-            videoEncode.setEncoderListener(new VideoEncode.OnEncoderListener() {
-                @Override
-                public void onStart() {
+    public void onConfirm(View view) {
+        videoEncode = new VideoEncode();
+        videoEncode.setEncoderListener(new VideoEncode.OnEncoderListener() {
+            @Override
+            public void onStart() {
 
-                }
+            }
 
-                @Override
-                public void onStop() {
+            @Override
+            public void onStop() {
 
-                }
+            }
 
-                @Override
-                public void onProgress(int progress) {
-
-                }
-            });
-        }
+            @Override
+            public void onProgress(int progress) {
+                Log.d(TAG, "onProgress: "+progress);
+            }
+        });
         float[] cutArr = cutView.getCutArr();
         float left = cutArr[0];
         float top = cutArr[1];
@@ -1064,16 +1056,16 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
         //得到裁剪位置
         int cropWidth = (int) (player.getVideoFormat().width * (rightPro - leftPro));
         int cropHeight = (int) (player.getVideoFormat().height * (bottomPro - topPro));
-        if(cropWidth%2 != 0){
+        if (cropWidth % 2 != 0) {
             cropWidth = cropWidth - 1;
         }
-        if(cropHeight%2 != 0){
+        if (cropHeight % 2 != 0) {
             cropHeight = cropHeight - 1;
         }
-        float f = left/cutView.getWidth();
-        float t = 1.0f - top/cutView.getHeight();
-        float r = right/cutView.getWidth();
-        float b = 1.0f - bottom/cutView.getHeight();
+        float f = left / cutView.getWidth();
+        float t = 1.0f - top / cutView.getHeight();
+        float r = right / cutView.getWidth();
+        float b = 1.0f - bottom / cutView.getHeight();
 
 
         float[] textureVertexData = {
@@ -1082,10 +1074,12 @@ public class VideoEditActivity extends AppCompatActivity implements MarkerView.M
                 r, t,
                 f, t
         };
+        Log.d(TAG, "onConfirm: cropWidth " + cropWidth + " cropHeight " + cropHeight
+                + " \n " + Arrays.toString(textureVertexData));
         videoEncode.init(mFilename,
-                (long)(Double.valueOf(formatTime(mStartPos))*1000*1000),
-                (long)(Double.valueOf(formatTime(mEndPos))*1000*1000),
-                cropWidth,cropHeight,textureVertexData);
+                (long) (Double.valueOf(formatTime(mStartPos)) * 1000 * 1000),
+                (long) (Double.valueOf(formatTime(mEndPos)) * 1000 * 1000),
+                cropWidth, cropHeight, textureVertexData);
     }
 
 }
